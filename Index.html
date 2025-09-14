@@ -348,10 +348,23 @@ function applyBackground(){ const sel = document.getElementById('bgSelect').valu
 function applyMusic(){ const f = document.getElementById('musicFile').value || 'music.mp4'; const a = document.getElementById('bgAudio'); a.src = f; a.load(); showModal('Music set', f); }
 
 /* --------------- Key usage ------------------ */
+
 function unlockWithKey(){
-  const input = document.getElementById('userKeyInput').value.trim();
-  const all = readKeys();
-  if(!input){ document.getElementById('homeMsg').textContent = 'Please enter a key.'; return; }
+  const key=document.getElementById("userKeyInput").value.trim();
+  const msg=document.getElementById("homeMsg");
+  if(!key){msg.innerText="Enter key";return;}
+  db.ref("keys/"+key).once("value").then(snap=>{
+    if(!snap.exists()){msg.innerText="Invalid key";return;}
+    const v=snap.val();
+    if(v.expiresAt<Date.now()){msg.innerText="Key expired";return;}
+    sessionStorage.setItem("bt_active", JSON.stringify(v));
+    document.getElementById("home-card").style.display="none";
+    document.getElementById("predictionCard").style.display="block";
+    document.getElementById("activeKeyLabel").innerText=v.key;
+    monitorExpiry(v.key, v.expiresAt);   // ✅ start expiry monitor
+  });
+}
+
   const found = all.find(k=>k.key === input);
   if(!found){ document.getElementById('homeMsg').textContent = 'Invalid key.'; return; }
   if(found.expiresAt <= Date.now()){ document.getElementById('homeMsg').textContent = 'Key expired.'; return; }
@@ -495,12 +508,84 @@ function openPredictionPage(){
   loadResultsToUI();
 }
 
+
+function monitorExpiry(key, expAt){
+  const interval = setInterval(()=>{
+    const diff = expAt - Date.now();
+    if(diff <= 0){
+      clearInterval(interval);
+      // delete expired key from Firebase so it can't be reused
+      db.ref("keys/"+key).remove();
+      // clear session
+      sessionStorage.removeItem("bt_active");
+      // reset UI
+      document.getElementById("predictionCard").style.display="none";
+      document.getElementById("home-card").style.display="block";
+      document.getElementById("homeMsg").innerText="Key expired. Please enter a new key.";
+    }
+  }, 1000);
+}
+
 </script>
 
 <!-- Firebase SDKs -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js">
+function monitorExpiry(key, expAt){
+  const interval = setInterval(()=>{
+    const diff = expAt - Date.now();
+    if(diff <= 0){
+      clearInterval(interval);
+      // delete expired key from Firebase so it can't be reused
+      db.ref("keys/"+key).remove();
+      // clear session
+      sessionStorage.removeItem("bt_active");
+      // reset UI
+      document.getElementById("predictionCard").style.display="none";
+      document.getElementById("home-card").style.display="block";
+      document.getElementById("homeMsg").innerText="Key expired. Please enter a new key.";
+    }
+  }, 1000);
+}
+
+</script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js">
+function monitorExpiry(key, expAt){
+  const interval = setInterval(()=>{
+    const diff = expAt - Date.now();
+    if(diff <= 0){
+      clearInterval(interval);
+      // delete expired key from Firebase so it can't be reused
+      db.ref("keys/"+key).remove();
+      // clear session
+      sessionStorage.removeItem("bt_active");
+      // reset UI
+      document.getElementById("predictionCard").style.display="none";
+      document.getElementById("home-card").style.display="block";
+      document.getElementById("homeMsg").innerText="Key expired. Please enter a new key.";
+    }
+  }, 1000);
+}
+
+</script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js">
+function monitorExpiry(key, expAt){
+  const interval = setInterval(()=>{
+    const diff = expAt - Date.now();
+    if(diff <= 0){
+      clearInterval(interval);
+      // delete expired key from Firebase so it can't be reused
+      db.ref("keys/"+key).remove();
+      // clear session
+      sessionStorage.removeItem("bt_active");
+      // reset UI
+      document.getElementById("predictionCard").style.display="none";
+      document.getElementById("home-card").style.display="block";
+      document.getElementById("homeMsg").innerText="Key expired. Please enter a new key.";
+    }
+  }, 1000);
+}
+
+</script>
 <script>
   // Firebase config for terminal-xxrr project
   const firebaseConfig = {
@@ -546,10 +631,23 @@ function openPredictionPage(){
   }
 
   // Unlock with key
-  function unlockWithKey(){
-    const key=document.getElementById("userKeyInput").value.trim();
-    const msg=document.getElementById("homeMsg");
-    if(!key){msg.innerText="Enter key";return;}
+  
+function unlockWithKey(){
+  const key=document.getElementById("userKeyInput").value.trim();
+  const msg=document.getElementById("homeMsg");
+  if(!key){msg.innerText="Enter key";return;}
+  db.ref("keys/"+key).once("value").then(snap=>{
+    if(!snap.exists()){msg.innerText="Invalid key";return;}
+    const v=snap.val();
+    if(v.expiresAt<Date.now()){msg.innerText="Key expired";return;}
+    sessionStorage.setItem("bt_active", JSON.stringify(v));
+    document.getElementById("home-card").style.display="none";
+    document.getElementById("predictionCard").style.display="block";
+    document.getElementById("activeKeyLabel").innerText=v.key;
+    monitorExpiry(v.key, v.expiresAt);   // ✅ start expiry monitor
+  });
+}
+
     db.ref("keys/"+key).once("value").then(snap=>{
       if(!snap.exists()){msg.innerText="Invalid key";return;}
       const v=snap.val();
@@ -565,6 +663,24 @@ function openPredictionPage(){
   function deleteKey(k){
     return db.ref("keys/"+k).remove().then(()=>renderKeysList());
   }
+
+function monitorExpiry(key, expAt){
+  const interval = setInterval(()=>{
+    const diff = expAt - Date.now();
+    if(diff <= 0){
+      clearInterval(interval);
+      // delete expired key from Firebase so it can't be reused
+      db.ref("keys/"+key).remove();
+      // clear session
+      sessionStorage.removeItem("bt_active");
+      // reset UI
+      document.getElementById("predictionCard").style.display="none";
+      document.getElementById("home-card").style.display="block";
+      document.getElementById("homeMsg").innerText="Key expired. Please enter a new key.";
+    }
+  }, 1000);
+}
+
 </script>
 
 </body>
