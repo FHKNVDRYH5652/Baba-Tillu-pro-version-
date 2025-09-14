@@ -344,8 +344,8 @@ function clearExpired(){ let arr = readKeys().filter(k=>k.expiresAt > Date.now()
 function deleteAllKeys(){ if(!confirm('Delete all keys?')) return; localStorage.removeItem('bt_keys'); renderKeysList(); showModal('All keys deleted','Storage cleared.'); }
 
 /* ------- background & music control -------- */
-function applyBackground(){ const sel = document.getElementById('bgSelect').value || 'anime1.png'; document.body.style.backgroundImage = `url('${sel}')`; document.getElementById('logo-img').src = sel; showModal('Background applied', sel); }
-function applyMusic(){ const f = document.getElementById('musicFile').value || 'music.mp4'; const a = document.getElementById('bgAudio'); a.src = f; a.load(); showModal('Music set', f); }
+function applyBackground(){ const sel = document.getElementById('bgSelect').value || 'anime2.png'; document.body.style.backgroundImage = `url('${sel}')`; document.getElementById('logo-img').src = sel; showModal('Background applied', sel); }
+function applyMusic(){ const f = document.getElementById('musicFile').value || 'music.m4a'; const a = document.getElementById('bgAudio'); a.src = f; a.load(); showModal('Music set', f); }
 
 /* --------------- Key usage ------------------ */
 function unlockWithKey(){
