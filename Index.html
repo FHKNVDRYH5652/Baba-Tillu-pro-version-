@@ -179,7 +179,7 @@
 
           <div style="margin-top:12px">
             <label>Music filename:</label>
-            <input id="musicFile" type="text" placeholder="music.m4a" value="music.mp4" style="width:160px">
+            <input id="musicFile" type="text" placeholder="music.mp4" value="music.m4a" style="width:160px">
             <button onclick="applyMusic()">Apply</button>
             <div class="small-muted">Note: Browser may block autoplay until user interacts.</div>
           </div>
@@ -253,7 +253,7 @@
 </div>
 
 <!-- audio element for background music -->
-<audio id="bgAudio" src="music.mp4" loop preload="auto"></audio>
+<audio id="bgAudio" src="music.m4a" loop preload="auto"></audio>
 
 <!-- modal -->
 <div id="modal" class="modal"><div class="modal-card">
@@ -344,8 +344,8 @@ function clearExpired(){ let arr = readKeys().filter(k=>k.expiresAt > Date.now()
 function deleteAllKeys(){ if(!confirm('Delete all keys?')) return; localStorage.removeItem('bt_keys'); renderKeysList(); showModal('All keys deleted','Storage cleared.'); }
 
 /* ------- background & music control -------- */
-function applyBackground(){ const sel = document.getElementById('bgSelect').value || 'anime2.png'; document.body.style.backgroundImage = `url('${sel}')`; document.getElementById('logo-img').src = sel; showModal('Background applied', sel); }
-function applyMusic(){ const f = document.getElementById('musicFile').value || 'music.m4a'; const a = document.getElementById('bgAudio'); a.src = f; a.load(); showModal('Music set', f); }
+function applyBackground(){ const sel = document.getElementById('bgSelect').value || 'anime1.png'; document.body.style.backgroundImage = `url('${sel}')`; document.getElementById('logo-img').src = sel; showModal('Background applied', sel); }
+function applyMusic(){ const f = document.getElementById('musicFile').value || 'music.mp4'; const a = document.getElementById('bgAudio'); a.src = f; a.load(); showModal('Music set', f); }
 
 /* --------------- Key usage ------------------ */
 function unlockWithKey(){
@@ -473,15 +473,28 @@ function tryPlayAudio(){ const a = document.getElementById('bgAudio'); a.loop = 
 function stopAudio(){ const a = document.getElementById('bgAudio'); try{ a.pause(); a.currentTime = 0; }catch(e){} }
 
 /* Init */
+
 (function init(){
+  // Home page background and logo
   document.body.style.backgroundImage = `url('anime2.png')`;
-  document.getElementById('logo-img').src = 'anime1.png';
+  document.getElementById('logo-img').src = 'anime2.png';
   renderKeysList();
   if(checkSessionValidity()) openPredictionPage();
   // keep keys list tidy each hour
   setInterval(()=>{ const arr = readKeys().filter(k=>k.expiresAt > Date.now()); writeKeys(arr); renderKeysList(); }, 60*60*1000);
   updateActiveKeyInfo();
 })();
+
+// When prediction page is shown, switch background
+function openPredictionPage(){
+  document.getElementById('predictionCard').style.display = 'block';
+  document.getElementById('homeMsg').textContent = '';
+  document.body.style.backgroundImage = `url('anime3.png')`;
+  tryPlayAudio();
+  updateActiveKeyInfo();
+  loadResultsToUI();
+}
+
 </script>
 
 <!-- Firebase SDKs -->
